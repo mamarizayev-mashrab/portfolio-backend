@@ -132,7 +132,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
     console.log(`
   ╔═══════════════════════════════════════════════════╗
   ║                                                   ║
@@ -144,6 +144,28 @@ const server = app.listen(PORT, () => {
   ║                                                   ║
   ╚═══════════════════════════════════════════════════╝
   `);
+
+    // Automatic Seeding for Admin
+    try {
+        const User = require('./models/User');
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@portfolio.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123456';
+
+        const adminExists = await User.findOne({ email: adminEmail });
+        if (!adminExists) {
+            console.log('Creating default admin user...');
+            await User.create({
+                email: adminEmail,
+                password: adminPassword,
+                name: 'Admin'
+            });
+            console.log('✅ Default admin user created successfully');
+        } else {
+            console.log('ℹ️ Admin user already exists');
+        }
+    } catch (error) {
+        console.error('❌ Error during automatic seeding:', error.message);
+    }
 });
 
 // Handle unhandled promise rejections
