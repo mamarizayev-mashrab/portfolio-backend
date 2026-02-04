@@ -20,30 +20,17 @@ connectDB();
 // ======================
 
 // CORS configuration
-const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://portfolio-frontend-six-bice.vercel.app' // Sizning Vercel manzilingiz
-].filter(Boolean);
-
-const corsOptions = {
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps, postman or curl)
-        if (!origin) return callback(null, true);
-
-        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-            callback(null, true);
-        } else {
-            console.log('Blocked by CORS:', origin);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+app.use(cors({
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
-};
-app.use(cors(corsOptions));
+}));
+
+// Root route
+app.get('/', (req, res) => {
+    res.send('Portfolio API is running...');
+});
 
 // Body parser
 app.use(express.json({ limit: '10mb' }));
