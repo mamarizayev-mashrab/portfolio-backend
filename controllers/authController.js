@@ -140,34 +140,8 @@ const changePassword = async (req, res) => {
     }
 };
 
-// TEMPORARY FORCE RESET
-const resetPasswordForce = async (req, res) => {
-    try {
-        // Find any admin user
-        const user = await User.findOne({ role: 'admin' });
-        if (!user) {
-            // If no user exists, create one
-            await User.create({
-                name: 'Admin',
-                email: 'admin@portfolio.com',
-                password: 'Admin@123456',
-                role: 'admin'
-            });
-            return res.status(200).json({ message: 'Admin created with Admin@123456' });
-        }
-
-        user.password = 'Admin@123456';
-        await user.save();
-
-        res.status(200).json({ message: 'Password reset to Admin@123456' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
 module.exports = {
     login,
     getMe,
-    changePassword,
-    resetPasswordForce
+    changePassword
 };
