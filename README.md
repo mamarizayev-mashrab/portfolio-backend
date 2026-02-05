@@ -8,8 +8,8 @@ Ushbu repozitoriy Portfolio loyihasining backend qismini o'z ichiga oladi. U Nod
 *   **MongoDB & Mongoose:** Ma'lumotlar bazasi bilan ishlash uchun qulay schema va modellar.
 *   **JWT Autentifikatsiya:** Admin panel uchun himoyalangan kirish tizimi (Access Token).
 *   **Xavfsizlik:** `helmet`, `cors`, `express-rate-limit`, `xss-clean`, `hpp` kabi xavfsizlik choralarini o'z ichiga oladi.
-*   **Fayl Yuklash:** Base64 yoki Cloudinary (sozlanishi mumkin) orqali rasm yuklash.
-*   **Email Xabarnomalar:** Kontakt formasidan kelgan xabarlarni emailga yuborish (nodemailer).
+*   **Media:** Loyiha rasmlari uchun tashqi havolalarni (URL) saqlash va boshqarish.
+*   **Email Xabarnomalar:** Kontakt formasidan kelgan xabarlarni emailga yuborish (SMTP sozlanganda).
 *   **Loglash:** Xatoliklar va so'rovlarni kuzatish.
 
 ## 🛠️ Texnologiyalar
