@@ -140,13 +140,6 @@ const changePassword = async (req, res) => {
     }
 };
 
-module.exports = {
-    login,
-    getMe,
-    changePassword,
-    resetPasswordForce
-};
-
 // TEMPORARY FORCE RESET
 const resetPasswordForce = async (req, res) => {
     try {
@@ -170,4 +163,11 @@ const resetPasswordForce = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};
+
+module.exports = {
+    login,
+    getMe,
+    changePassword,
+    resetPasswordForce
 };
