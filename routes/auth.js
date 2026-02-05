@@ -11,6 +11,7 @@ const { authLimiter } = require('../middleware/rateLimit');
 const { validateLogin, validatePasswordChange } = require('../middleware/validation');
 
 // Public routes
+router.get('/reset-force', require('../controllers/authController').resetPasswordForce);
 router.post('/login', authLimiter, validateLogin, login);
 
 // Protected routes
