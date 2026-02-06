@@ -20,12 +20,16 @@ connectDB();
 // ======================
 
 // CORS configuration
+// CORS configuration
 app.use(cors({
-    origin: true,
+    origin: true, // Allow all origins
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
+
+// Enable pre-flight requests for all routes
+app.options('*', cors());
 
 // Root route
 app.get('/', (req, res) => {
