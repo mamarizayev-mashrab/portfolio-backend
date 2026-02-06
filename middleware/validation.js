@@ -58,22 +58,44 @@ const validateProject = [
     handleValidationErrors
 ];
 
-// Skill validation rules
+// Skill validation rules - flexible for both string and object name
 const validateSkill = [
-    body('name').notEmpty().withMessage('Skill name is required'),
-    body('category').isIn(['frontend', 'backend', 'database', 'devops', 'tools', 'other'])
-        .withMessage('Invalid category'),
+    body('name').custom((value) => {
+        // Accept both string and object with at least one language
+        if (typeof value === 'string' && value.trim()) return true;
+        if (typeof value === 'object' && (value.en || value.uz || value.ru)) return true;
+        throw new Error('Skill name is required');
+    }),
+    body('category').optional().custom((value) => {
+        const validCategories = ['frontend', 'backend', 'mobile', 'database', 'devops', 'tools', 'other'];
+        const normalizedValue = value ? value.toLowerCase() : 'other';
+        if (validCategories.includes(normalizedValue)) return true;
+        throw new Error('Invalid category');
+    }),
     body('proficiency').optional().isInt({ min: 0, max: 100 })
         .withMessage('Proficiency must be between 0 and 100'),
+    body('level').optional().isInt({ min: 0, max: 100 })
+        .withMessage('Level must be between 0 and 100'),
     handleValidationErrors
 ];
 
-// Experience validation rules
+// Experience validation rules - flexible for role or title
 const validateExperience = [
-    body('title.uz').notEmpty().withMessage('Uzbek title is required'),
-    body('title.en').notEmpty().withMessage('English title is required'),
-    body('title.ru').notEmpty().withMessage('Russian title is required'),
-    body('company').notEmpty().withMessage('Company name is required'),
+    body().custom((value, { req }) => {
+        // Check if either title or role has at least English version
+        const hasTitle = req.body.title && (req.body.title.en || req.body.title.uz || req.body.title.ru);
+        const hasRole = req.body.role && (req.body.role.en || req.body.role.uz || req.body.role.ru);
+        if (!hasTitle && !hasRole) {
+            throw new Error('Title or Role is required (at least one language)');
+        }
+        return true;
+    }),
+    body('company').custom((value) => {
+        // Accept both string and object
+        if (typeof value === 'string' && value.trim()) return true;
+        if (typeof value === 'object' && (value.en || value.uz || value.ru)) return true;
+        throw new Error('Company name is required');
+    }),
     body('startDate').isISO8601().withMessage('Valid start date is required'),
     handleValidationErrors
 ];
