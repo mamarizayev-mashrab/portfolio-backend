@@ -7,6 +7,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const { pingDB } = require('./config/db');
 const { apiLimiter } = require('./middleware/rateLimit');
 
 // Initialize Express
@@ -50,12 +51,15 @@ app.use('/api', apiLimiter);
 // API Routes
 // ======================
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
+// Health check endpoint (also used by keep-alive service)
+app.get('/api/health', async (req, res) => {
+    const dbStatus = await pingDB();
     res.status(200).json({
         success: true,
         message: 'Portfolio API is running',
-        timestamp: new Date().toISOString()
+        database: dbStatus ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
     });
 });
 
@@ -169,6 +173,33 @@ const server = app.listen(PORT, async () => {
         }
     } catch (error) {
         console.error('❌ Error during automatic seeding:', error.message);
+    }
+
+    // ======================
+    // Keep-Alive Mechanism
+    // ======================
+    // Ping server every 14 minutes to prevent Render from sleeping
+    const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
+
+    if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
+        const keepAlive = async () => {
+            try {
+                const https = require('https');
+                const url = `${process.env.RENDER_EXTERNAL_URL}/api/health`;
+
+                https.get(url, (res) => {
+                    console.log(`🏓 Keep-alive ping: ${res.statusCode} at ${new Date().toISOString()}`);
+                }).on('error', (err) => {
+                    console.error('❌ Keep-alive ping failed:', err.message);
+                });
+            } catch (error) {
+                console.error('❌ Keep-alive error:', error.message);
+            }
+        };
+
+        // Start keep-alive interval
+        setInterval(keepAlive, KEEP_ALIVE_INTERVAL);
+        console.log('🏓 Keep-alive mechanism started (every 14 minutes)');
     }
 });
 
