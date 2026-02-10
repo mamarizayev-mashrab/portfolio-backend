@@ -5,6 +5,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const { pingDB } = require('./config/db');
@@ -75,13 +76,18 @@ app.get('/api/health', async (req, res) => {
     });
 });
 
-// Mount routes
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/skills', require('./routes/skills'));
 app.use('/api/experiences', require('./routes/experiences'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/articles', require('./routes/articles'));
+app.use('/api/upload', require('./routes/upload'));
+
+// Static folder for uploads
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
 // ======================
 // Error Handling
