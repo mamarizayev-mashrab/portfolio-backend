@@ -21,9 +21,21 @@ connectDB();
 // ======================
 
 // CORS configuration
-// CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [process.env.FRONTEND_URL, 'https://asqarovich.uz', 'https://portfolio-frontend-phi-ashen.vercel.app']
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
 app.use(cors({
-    origin: true, // Allow all origins
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1 && process.env.NODE_ENV === 'production') {
+            const msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires']
