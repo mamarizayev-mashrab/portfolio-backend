@@ -22,24 +22,15 @@ connectDB();
 // ======================
 
 // CORS configuration
-const allowedOrigins = [
-    'https://asqarovich.uz',
-    'https://www.asqarovich.uz',
-    'https://portfolio-frontend-six-bice.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000',
-    process.env.FRONTEND_URL
-].filter(Boolean);
-
+// Use origin: true to reflect request origin
 const corsOptions = {
-    origin: allowedOrigins,
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires']
 };
 
 app.use(cors(corsOptions));
-
 // Enable pre-flight requests for all routes with shared options
 app.options('*', cors(corsOptions));
 
