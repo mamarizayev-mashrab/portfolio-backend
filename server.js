@@ -22,7 +22,7 @@ connectDB();
 
 // CORS configuration
 const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL, 'https://asqarovich.uz', 'https://portfolio-frontend-six-bice.vercel.app']
+    ? [process.env.FRONTEND_URL, 'https://asqarovich.uz', 'https://www.asqarovich.uz', 'https://portfolio-frontend-six-bice.vercel.app']
     : ['http://localhost:5173', 'http://localhost:3000'];
 
 app.use(cors({
