@@ -24,7 +24,7 @@ connectDB();
 // CORS configuration
 // Use origin: true to reflect request origin
 const corsOptions = {
-    origin: true,
+    origin: ['https://www.asqarovich.uz', 'http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires']
