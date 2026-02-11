@@ -22,9 +22,23 @@ connectDB();
 // ======================
 
 // CORS configuration
-// Use origin: true to reflect request origin
+const allowedOrigins = [
+    'https://www.asqarovich.uz',
+    'https://asqarovich.uz',
+    'http://localhost:5173',
+    'http://localhost:3000'
+];
+
 const corsOptions = {
-    origin: ['https://www.asqarovich.uz', 'http://localhost:5173', 'http://localhost:3000'],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log('CORS blocked for origin:', origin);
+            callback(null, false);
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires']
