@@ -16,7 +16,6 @@ const app = express();
 
 // Connect to MongoDB
 connectDB();
-
 // ======================
 // Middleware Configuration
 // ======================
@@ -31,8 +30,7 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             console.log('CORS blocked for origin:', origin);
@@ -41,27 +39,29 @@ const corsOptions = {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 };
 
+// 1. MUST BE FIRST: CORS
 app.use(cors(corsOptions));
-// Enable pre-flight requests for all routes with shared options
 app.options('*', cors(corsOptions));
+
+// 2. Body parser
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// 3. Trust proxy
+app.set('trust proxy', 1);
+
+// 4. Rate limiting (AFTER CORS)
+app.use('/api', apiLimiter);
 
 // Root route
 app.get('/', (req, res) => {
     res.send('Portfolio API is running...');
 });
-
-// Body parser
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-// Trust proxy for rate limiting behind reverse proxy
-app.set('trust proxy', 1);
-
-// Apply general rate limiting to all requests
-app.use('/api', apiLimiter);
 
 // ======================
 // API Routes
