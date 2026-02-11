@@ -20,31 +20,43 @@ connectDB();
 // Middleware Configuration
 // ======================
 
-// CORS configuration
-const allowedOrigins = [
-    'https://www.asqarovich.uz',
-    'https://asqarovich.uz',
-    'http://localhost:5173',
-    'http://localhost:3000'
-];
+// 1. Manual CORS Headers (Fallback & Debug)
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const allowed = [
+        'https://www.asqarovich.uz',
+        'https://asqarovich.uz',
+        'http://localhost:5173',
+        'http://localhost:3000'
+    ];
 
+    if (allowed.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    } else if (!origin) {
+        // Allow mobile/server-to-server requests
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma, Expires');
+
+    // Handle manual preflight
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+    next();
+});
+
+// 2. Standard CORS middleware with reflected origin
 const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.log('CORS blocked for origin:', origin);
-            callback(null, false);
-        }
-    },
+    origin: true, // Reflect the request origin
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires'],
-    preflightContinue: false,
     optionsSuccessStatus: 204
 };
 
-// 1. MUST BE FIRST: CORS
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
