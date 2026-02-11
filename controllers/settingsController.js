@@ -87,8 +87,25 @@ const updateSection = async (req, res) => {
             settings = await Settings.create({});
         }
 
-        // Update specific section
-        settings[section] = { ...settings[section], ...req.body };
+        // Deep merge utility for settings section
+        const deepMerge = (target, source) => {
+            for (const key in source) {
+                if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                    if (!target[key]) target[key] = {};
+                    deepMerge(target[key], source[key]);
+                } else {
+                    target[key] = source[key];
+                }
+            }
+            return target;
+        };
+
+        // Update specific section with deep merge
+        settings[section] = deepMerge(settings[section] || {}, req.body);
+
+        // Mark as modified if it's a subdocument or mixed type
+        settings.markModified(section);
+
         await settings.save();
 
         res.status(200).json({
@@ -97,6 +114,7 @@ const updateSection = async (req, res) => {
             data: settings
         });
     } catch (error) {
+        console.error(`Error updating settings section ${req.params.section}:`, error);
         res.status(500).json({
             success: false,
             message: 'Error updating section'

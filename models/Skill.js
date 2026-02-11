@@ -6,7 +6,7 @@
 const mongoose = require('mongoose');
 
 const skillSchema = new mongoose.Schema({
-    // i18n skill name object (can be string for backward compatibility)
+    // i18n skill name object
     name: {
         type: mongoose.Schema.Types.Mixed,
         required: [true, 'Skill name is required']
@@ -19,23 +19,17 @@ const skillSchema = new mongoose.Schema({
     // Skill category (case-insensitive, stored lowercase)
     category: {
         type: String,
-        enum: ['frontend', 'backend', 'mobile', 'database', 'devops', 'tools', 'other',
-            'Frontend', 'Backend', 'Mobile', 'Database', 'DevOps', 'Tools', 'Other'],
+        enum: ['frontend', 'backend', 'mobile', 'database', 'devops', 'tools', 'other'],
         default: 'other',
         set: v => v ? v.toLowerCase() : 'other'
     },
-    // Proficiency/Level (0-100) - supports both field names
-    proficiency: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: 80
-    },
+    // Progress bar value (0-100)
     level: {
         type: Number,
         min: 0,
         max: 100,
-        default: 80
+        required: [true, 'Skill level is required'],
+        default: 0
     },
     // Display order within category
     order: {
@@ -48,15 +42,8 @@ const skillSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
-// Pre-save middleware to sync level and proficiency
+// Pre-save middleware
 skillSchema.pre('save', function (next) {
-    // If level is set but proficiency is not, sync them
-    if (this.level && !this.proficiency) {
-        this.proficiency = this.level;
-    }
-    if (this.proficiency && !this.level) {
-        this.level = this.proficiency;
-    }
     // Normalize category to lowercase
     if (this.category) {
         this.category = this.category.toLowerCase();
@@ -67,15 +54,17 @@ skillSchema.pre('save', function (next) {
 // Pre-update middleware
 skillSchema.pre('findOneAndUpdate', function (next) {
     const update = this.getUpdate();
-    if (update.level && !update.proficiency) {
-        update.proficiency = update.level;
-    }
-    if (update.proficiency && !update.level) {
-        update.level = update.proficiency;
-    }
+
+    // Normalize category in updates
     if (update.category) {
         update.category = update.category.toLowerCase();
     }
+
+    // Handle proficiency alias from old requests
+    if (update.proficiency && !update.level) {
+        update.level = update.proficiency;
+    }
+
     next();
 });
 

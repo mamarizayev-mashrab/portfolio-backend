@@ -123,6 +123,13 @@ const updateExperience = async (req, res) => {
             data: experience
         });
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(e => e.message);
+            return res.status(400).json({
+                success: false,
+                message: messages.join(', ')
+            });
+        }
         res.status(500).json({
             success: false,
             message: 'Error updating experience'

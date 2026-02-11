@@ -1,27 +1,22 @@
 /**
  * Experience Model - Work experience/education timeline
- * Supports i18n for title/role, company and description
+ * Supports i18n for role, company and description
  */
 
 const mongoose = require('mongoose');
 
 const experienceSchema = new mongoose.Schema({
-    // i18n title object (position/role)
-    title: {
-        uz: { type: String, default: '' },
-        en: { type: String, default: '' },
-        ru: { type: String, default: '' }
-    },
-    // i18n role object (alias for title, for frontend compatibility)
+    // i18n role object (position/role)
     role: {
         uz: { type: String, default: '' },
-        en: { type: String, default: '' },
+        en: { type: String, default: '', required: [true, 'English role is required'] },
         ru: { type: String, default: '' }
     },
-    // Company/Organization - supports both string and i18n object
+    // Company/Organization - strict i18n object
     company: {
-        type: mongoose.Schema.Types.Mixed,
-        required: [true, 'Company name is required']
+        uz: { type: String, default: '' },
+        en: { type: String, default: '', required: [true, 'English company name is required'] },
+        ru: { type: String, default: '' }
     },
     // i18n description object
     description: {
@@ -66,35 +61,17 @@ const experienceSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
-// Pre-save middleware to sync title and role
-experienceSchema.pre('save', function (next) {
-    // If role is provided but title is empty, copy role to title
-    if (this.role && (this.role.en || this.role.uz || this.role.ru)) {
-        if (!this.title.en) this.title.en = this.role.en || '';
-        if (!this.title.uz) this.title.uz = this.role.uz || '';
-        if (!this.title.ru) this.title.ru = this.role.ru || '';
-    }
-    // Vice versa: if title is provided but role is empty
-    if (this.title && (this.title.en || this.title.uz || this.title.ru)) {
-        if (!this.role.en) this.role.en = this.title.en || '';
-        if (!this.role.uz) this.role.uz = this.title.uz || '';
-        if (!this.role.ru) this.role.ru = this.title.ru || '';
-    }
-    next();
-});
-
-// Pre-update middleware
+// Pre-update middleware to handle title alias from old requests
 experienceSchema.pre('findOneAndUpdate', function (next) {
     const update = this.getUpdate();
-
-    // Sync role and title in updates
-    if (update.role && !update.title) {
-        update.title = update.role;
-    }
     if (update.title && !update.role) {
         update.role = update.title;
     }
-
+    // Backward compatibility for company if sent as string (wrap in i18n object)
+    if (typeof update.company === 'string') {
+        const name = update.company;
+        update.company = { uz: name, en: name, ru: name };
+    }
     next();
 });
 
