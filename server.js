@@ -10,6 +10,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const { pingDB } = require('./config/db');
 const { apiLimiter } = require('./middleware/rateLimit');
+const compression = require('compression');
+const helmet = require('helmet');
 
 // Initialize Express
 const app = express();
@@ -59,6 +61,21 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+// 3. Security & Compression
+app.use(helmet({
+    crossOriginResourcePolicy: false, // Allow images from other origins if needed
+}));
+app.use(compression());
+
+// 4. Cache Control for Public GET requests
+app.use((req, res, next) => {
+    if (req.method === 'GET' && req.url.startsWith('/api/')) {
+        // Cache public assets for 5 minutes
+        res.set('Cache-Control', 'public, max-age=300');
+    }
+    next();
+});
 
 // 2. Body parser
 app.use(express.json({ limit: '10mb' }));

@@ -23,16 +23,22 @@ const getArticles = async (req, res) => {
             query.tags = { $regex: new RegExp(`^${tag}$`, 'i') };
         }
 
+        let clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+        if (clientIP.includes(',')) {
+            clientIP = clientIP.split(',')[0].trim();
+        }
+
         const total = await Article.countDocuments(query);
         const articlesData = await Article.find(query)
             .sort({ order: 1, createdAt: -1 })
             .skip(startIndex)
             .limit(limit);
 
-        // Transform to hide IPs but keep count
+        // Transform to hide IPs but keep count and check if current user liked it
         const articles = articlesData.map(art => {
             const obj = art.toObject();
             obj.likeCount = art.likes ? art.likes.length : 0;
+            obj.liked = art.likes ? art.likes.includes(clientIP) : false;
             delete obj.likes;
             return obj;
         });
@@ -114,8 +120,14 @@ const getArticle = async (req, res) => {
             approved: true
         }).sort({ createdAt: -1 });
 
+        let clientIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+        if (clientIP.includes(',')) {
+            clientIP = clientIP.split(',')[0].trim();
+        }
+
         const obj = articleData.toObject();
         obj.likeCount = articleData.likes ? articleData.likes.length : 0;
+        obj.liked = articleData.likes ? articleData.likes.includes(clientIP) : false;
         delete obj.likes;
         obj.comments = comments;
 

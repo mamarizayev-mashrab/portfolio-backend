@@ -57,9 +57,10 @@ const articleSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for ordering and status
+// Index for ordering, status, and tags
 articleSchema.index({ order: 1, createdAt: -1 });
 articleSchema.index({ status: 1 });
+articleSchema.index({ tags: 1 });
 
 // Virtual for like count
 articleSchema.virtual('likeCount').get(function () {
