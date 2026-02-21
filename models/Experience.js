@@ -75,8 +75,9 @@ experienceSchema.pre('findOneAndUpdate', function (next) {
     next();
 });
 
-// Index for ordering by date
+// Index for ordering by date and explicit order
 experienceSchema.index({ startDate: -1 });
+experienceSchema.index({ order: 1 });
 
 // Virtual for formatted date range
 experienceSchema.virtual('dateRange').get(function () {

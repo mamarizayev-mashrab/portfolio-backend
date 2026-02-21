@@ -1,9 +1,5 @@
-/**
- * Project Controller
- * CRUD operations for portfolio projects
- */
-
 const Project = require('../models/Project');
+const { deleteFile } = require('../utils/fileUtils');
 
 /**
  * @desc    Get all projects
@@ -145,6 +141,10 @@ const deleteProject = async (req, res) => {
                 success: false,
                 message: 'Project not found'
             });
+        }
+
+        if (project.image) {
+            deleteFile(project.image);
         }
 
         res.status(200).json({

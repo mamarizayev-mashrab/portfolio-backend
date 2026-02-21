@@ -58,8 +58,9 @@ const projectSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for ordering
+// Index for ordering and status
 projectSchema.index({ order: 1 });
+projectSchema.index({ status: 1 });
 
 // Virtual for getting all titles
 projectSchema.virtual('allTitles').get(function () {

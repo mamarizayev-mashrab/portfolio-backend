@@ -15,10 +15,6 @@ const protect = async (req, res, next) => {
         token = req.headers.authorization.split(' ')[1];
     }
 
-    // Check for token in cookies (alternative)
-    if (!token && req.cookies && req.cookies.token) {
-        token = req.cookies.token;
-    }
 
     // No token found
     if (!token) {

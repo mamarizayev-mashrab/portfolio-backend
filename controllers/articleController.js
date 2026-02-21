@@ -5,6 +5,7 @@
 
 const Article = require('../models/Article');
 const Comment = require('../models/Comment');
+const { deleteFile } = require('../utils/fileUtils');
 
 /**
  * @desc    Get all published articles (public)
@@ -221,6 +222,11 @@ const deleteArticle = async (req, res) => {
 
         // Also delete all comments for this article
         await Comment.deleteMany({ article: req.params.id });
+
+        // Cleanup image from disk
+        if (article.image) {
+            deleteFile(article.image);
+        }
 
         res.status(200).json({
             success: true,
