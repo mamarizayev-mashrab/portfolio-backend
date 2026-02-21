@@ -14,7 +14,8 @@ const apiLimiter = rateLimit({
         message: 'Too many requests, please try again later'
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS' // Skip CORS preflight requests
 });
 
 // Strict rate limiter for authentication routes
@@ -27,7 +28,8 @@ const authLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    skipSuccessfulRequests: true // Don't count successful logins
+    skipSuccessfulRequests: true, // Don't count successful logins
+    skip: (req) => req.method === 'OPTIONS' // Skip CORS preflight requests
 });
 
 // Contact form rate limiter
@@ -39,7 +41,8 @@ const contactLimiter = rateLimit({
         message: 'Too many messages sent, please try again later'
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS' // Skip CORS preflight requests
 });
 
 module.exports = {

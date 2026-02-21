@@ -22,7 +22,7 @@ connectDB();
 // Middleware Configuration
 // ======================
 
-// 1. Standard CORS middleware
+// 1. Precise CORS Configuration
 const allowedOrigins = [
     'https://www.asqarovich.uz',
     'https://asqarovich.uz',
@@ -31,15 +31,36 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-    origin: true, // Reflect the request origin
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma', 'Expires'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
     optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+
+// Handle OPTIONS preflight manually as a secondary fallback
+app.options('*', (req, res) => {
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin) || (process.env.NODE_ENV !== 'production' && origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Cache-Control, Pragma, Expires');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        return res.sendStatus(204);
+    }
+    res.sendStatus(403);
+});
 
 // 3. Security & Compression
 app.use(helmet({
